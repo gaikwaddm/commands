@@ -1,0 +1,54 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+
+namespace WebApplication10
+{
+    public partial class Room_Entry : System.Web.UI.Page
+    {
+        SqlConnection con;
+        SqlCommand cmdCat, cmdRow;
+        SqlDataReader dr;
+
+        protected void Button1_Click(object sender, EventArgs e)
+        {
+            int Room_No, Rent;
+            string Room_Category, status = "A";
+            Room_No = Convert.ToInt32(TextBox1.Text);
+            Rent = Convert.ToInt32(TextBox3.Text);
+            Room_Category = DropDownList1.SelectedValue;
+            string query = "insert into Room_Entry values("+Room_No+",'"+Room_Category+"','"+status+"','"+Rent+"')";
+            cmdRow = new SqlCommand(query, con);
+            con.Open();
+            cmdRow.ExecuteNonQuery();
+            con.Close();
+            TextBox1.Text = "";
+            TextBox3.Text = "";
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            con = new SqlConnection(@"data Source=5888E2F78D7956C;initial catalog=HotelDb;user id=sa;password=pass@word1;");
+            con.Open();
+            con.Close();
+            if (!IsPostBack == true)
+            {
+                con.Open();
+
+
+                cmdCat = new SqlCommand("select * from Room_category", con);
+                dr = cmdCat.ExecuteReader();
+                DropDownList1.Items.Clear();
+                while (dr.Read())
+                {
+                    DropDownList1.Items.Add(dr.GetString(1));
+                }
+                con.Close();
+            }
+        }
+    }
+}

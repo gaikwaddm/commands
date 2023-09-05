@@ -1,0 +1,98 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+
+namespace WebApplication10
+{
+    public partial class CheckOutForm : System.Web.UI.Page
+    {
+        SqlConnection con;
+        SqlCommand cmdId, cmdst, cmd2;
+        SqlDataReader dr;
+
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            int Room_No = 0;
+            int Rent = 0;
+            DateTime checkIN_Date, CheckOut_date;
+            int Totalamt,TotalDays;
+            
+            int CheckIn_Id = Convert.ToInt32(TextBox2.Text);
+            string query = "select * from Check_In where CheckIn_Id=" + CheckIn_Id;
+            con.Open();
+            cmdId = new SqlCommand(query, con);
+            dr = cmdId.ExecuteReader();
+            while (dr.Read())
+            {
+                if (CheckIn_Id == dr.GetInt32(0))
+                {
+                    TextBox3.Text = dr.GetString(2);
+                    TextBox4.Text = dr.GetString(1);
+                    TextBox5.Text = dr.GetString(3);
+                    Room_No = dr.GetInt32(7);
+
+                }
+            }
+            con.Close();
+            checkIN_Date = Convert.ToDateTime(TextBox4.Text);
+            CheckOut_date = Convert.ToDateTime(Label10.Text);
+            TotalDays = Convert.ToInt32((CheckOut_date - checkIN_Date).TotalDays);
+            TextBox6.Text =TotalDays.ToString();
+            string query2="select Rent from Room_Entry where Room_No="+Room_No;
+            con.Open();
+            cmd2 = new SqlCommand(query2, con);
+            dr = cmd2.ExecuteReader();
+            while (dr.Read())
+            {
+                Rent = dr.GetInt32(0);
+            }
+            Totalamt = TotalDays * Rent;
+            TextBox7.Text = Totalamt.ToString();
+            con.Close();
+
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Label10.Text = DateTime.Now.ToString();
+            con = new SqlConnection(@"data Source=5888E2F78D7956C;initial catalog=HotelDb;user id=sa;password=pass@word1;");
+            con.Open();
+            con.Close();
+        }
+
+        protected void Button1_Click(object sender, EventArgs e)
+        {
+            int CheckIn_Id, checkout_Id,Totalamt, TotalDays,Room_No=0;
+            string Cust_name, CheckIN_Date,Address;
+            CheckIn_Id = Convert.ToInt32(TextBox2.Text);
+            checkout_Id = Convert.ToInt32(TextBox1.Text);
+            Cust_name = TextBox3.Text;
+            CheckIN_Date = TextBox4.Text;
+            Address = TextBox5.Text;
+            TotalDays = Convert.ToInt32(TextBox6.Text);
+            Totalamt = Convert.ToInt32(TextBox7.Text);
+            
+
+            string query = "insert into Check_out values(" + checkout_Id + ",'"+CheckIn_Id+"','" + Cust_name + "','"+CheckIN_Date+"','"+Address+"','"+TotalDays+"','"+Totalamt+"')";
+            cmd2 = new SqlCommand(query, con);
+            con.Close();
+            con.Open();
+         
+            string query3 = "update Room_Entry set Status='A' where Room_No=" + Room_No;
+            cmdst = new SqlCommand(query3, con);
+            cmdst.ExecuteNonQuery();
+            con.Close();
+            TextBox1.Text = "";
+            TextBox2.Text = "";
+            TextBox3.Text = "";
+            TextBox4.Text = "";
+            TextBox5.Text = "";
+            TextBox6.Text = "";
+            TextBox7.Text = "";
+        }
+    }
+}

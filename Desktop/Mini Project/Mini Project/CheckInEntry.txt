@@ -1,0 +1,113 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+
+namespace WebApplication10
+{
+    public partial class CheckInform : System.Web.UI.Page
+    {
+        SqlConnection con;
+        SqlCommand cmdCheckIn,cmdCat,cmdRno;
+        SqlDataReader dr, Dr;
+
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            cmdRno = new SqlCommand("select * from Room_Entry", con);
+            Dr = cmdRno.ExecuteReader();
+            
+            while (Dr.Read())
+            {
+                if(Dr.GetString(1).Equals(DropDownList1.SelectedValue.ToString()) && Dr.GetString(2).Equals("A"))
+                {
+                    DropDownList4.Items.Add(Dr.GetInt32(0).ToString());
+                }
+            }
+            con.Close();
+        }
+
+       
+
+        protected void Button3_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            cmdRno = new SqlCommand("select * from Room_Entry", con);
+            Dr = cmdRno.ExecuteReader();
+            while (Dr.Read())
+            {
+                if (Dr.GetInt32(0) == Convert.ToInt32(DropDownList4.SelectedItem.ToString()))
+                {
+                    TextBox5.Text = Dr.GetInt32(3).ToString();
+                }
+            }
+            con.Close();
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Label13.Text=DateTime.Now.ToString();
+            if (!IsPostBack == true)
+            {
+
+                con = new SqlConnection(@"Data Source=5888E2F78D7956C;initial catalog=HotelDb;user id=sa;password=pass@word1");
+
+                con.Open();
+                DropDownList1.Items.Clear();
+                cmdCat = new SqlCommand("select * from Room_Category", con);
+                dr = cmdCat.ExecuteReader();
+                while (dr.Read())
+                {
+                    DropDownList1.Items.Add(dr.GetString(1));
+                }
+                con.Close();
+            }
+            else
+            {
+                con = new SqlConnection(@"Data Source=5888E2F78D7956C;initial catalog=HotelDb;user id=sa;password=pass@word1");
+                con.Open();
+                con.Close();
+            }
+
+
+        }
+
+        protected void Button1_Click(object sender, EventArgs e)
+        {
+            int CheckIn_Id,Room_No,Rent;
+            string Cust_name,CheckIn_Date,Mobile, Address, Identiy_Proof, Reason_Of_Stay;
+            CheckIn_Id = Convert.ToInt32(TextBox1.Text);
+            Cust_name = TextBox2.Text;
+            Address = TextBox6.Text;
+            Mobile = TextBox3.Text;
+            Identiy_Proof = DropDownList3.Text;
+            Reason_Of_Stay = TextBox7.Text;
+            CheckIn_Date = Label13.Text;
+            Room_No = Convert.ToInt32(DropDownList4.Text);
+            Rent = Convert.ToInt32(TextBox5.Text);
+            con.Open();
+
+            String query="insert into Check_In values("+CheckIn_Id+",'"+CheckIn_Date+"','"+Cust_name+"','"+Address+"','"+Mobile+"','"+Identiy_Proof+"','"+Reason_Of_Stay+"',)";
+            cmdCheckIn = new SqlCommand(query, con);
+            con.Close();
+            con.Open();
+            String query2 = "update Room_Entry set Status='O' where Room_No" + Room_No;
+            cmdRno = new SqlCommand(query2, con);
+            cmdRno.ExecuteNonQuery();
+            cmdCheckIn.ExecuteNonQuery();
+            con.Close();
+
+            TextBox1.Text = "";
+            TextBox2.Text = "";
+            TextBox6.Text = "";
+            TextBox3.Text = "";
+            TextBox7.Text = "";
+            TextBox5.Text = "";
+
+
+        }
+    }
+}
